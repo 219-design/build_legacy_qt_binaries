@@ -1,0 +1,14 @@
+prefix=/opt/legacy_qt/desktop
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include/QtDBus
+qt_config=lex yacc warn_on uic resources qt warn_on release incremental link_prl exceptions no_mocdepend release stl qt_no_framework release shared dll largefile stl precompile_header separate_debug_info mmx 3dnow sse sse2 dylib create_prl link_prl depend_includepath QTDIR_build link_pkgconfig qt_install_headers qt warn_on depend_includepath qmake_cache target_qt hide_symbols create_libtool create_pc explicitlib moc thread shared dll
+moc_location=/opt/legacy_qt/desktop/bin/moc
+uic_location=/opt/legacy_qt/desktop/bin/uic
+
+Name: Qtdbus
+Description: Qt DBus module
+Version: 4.4.3
+Libs: -L${libdir} -lQtDBus -L/opt/legacy_qt/desktop/lib  -lQtXml -L/opt/legacy_qt/desktop/lib -pthread -pthread -lQtCore -lm -lgthread-2.0 -pthread -lglib-2.0 -lrt -lpthread -ldl  
+Cflags: -DQT_SHARED -I/opt/legacy_qt/desktop/include -I${includedir}
+
