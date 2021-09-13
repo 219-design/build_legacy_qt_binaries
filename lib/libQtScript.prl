@@ -1,8 +1,0 @@
-QMAKE_PRL_BUILD_DIR = /tmp/build/src/script
-QMAKE_PRO_INPUT = script.pro
-QMAKE_PRL_SOURCE_DIR = /tmp/qt-x11-opensource-src-4.4.3/src/script
-QMAKE_PRL_TARGET = libQtScript.so.4.4.3
-QMAKE_PRL_DEFINES = QT_SHARED
-QMAKE_PRL_CONFIG = lex yacc warn_on uic resources qt warn_on release incremental link_prl exceptions no_mocdepend release stl qt_no_framework release shared dll largefile stl precompile_header separate_debug_info mmx 3dnow sse sse2 dylib create_prl link_prl depend_includepath QTDIR_build qt_install_headers qt warn_on depend_includepath qmake_cache target_qt hide_symbols create_libtool create_pc explicitlib moc thread shared dll
-QMAKE_PRL_VERSION = 4.4.3
-QMAKE_PRL_LIBS = -L/opt/legacy_qt/desktop/lib  -lQtCore -L/opt/legacy_qt/desktop/lib -lm -lgthread-2.0 -pthread -lglib-2.0 -lrt -lpthread -ldl 

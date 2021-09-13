@@ -1,37 +1,41 @@
 /****************************************************************************
 **
-** Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies).
-** Contact: Qt Software Information (qt-info@nokia.com)
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtOpenGL module of the Qt Toolkit.
 **
-** Commercial Usage
-** Licensees holding valid Qt Commercial licenses may use this file in
-** accordance with the Qt Commercial License Agreement provided with the
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
 ** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and Nokia.
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see http://www.qt.io/terms-conditions. For further
+** information use the contact form at http://www.qt.io/contact-us.
 **
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 or version 3 as published by the Free
+** Software Foundation and appearing in the file LICENSE.LGPLv21 and
+** LICENSE.LGPLv3 included in the packaging of this file. Please review the
+** following information to ensure the GNU Lesser General Public License
+** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** As a special exception, The Qt Company gives you certain additional
+** rights. These rights are described in The Qt Company LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
 **
 ** GNU General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU
-** General Public License versions 2.0 or 3.0 as published by the Free
-** Software Foundation and appearing in the file LICENSE.GPL included in
-** the packaging of this file.  Please review the following information
-** to ensure GNU General Public Licensing requirements will be met:
-** http://www.fsf.org/licensing/licenses/info/GPLv2.html and
-** http://www.gnu.org/copyleft/gpl.html.  In addition, as a special
-** exception, Nokia gives you certain additional rights. These rights
-** are described in the Nokia Qt GPL Exception version 1.3, included in
-** the file GPL_EXCEPTION.txt in this package.
+** General Public License version 3.0 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU General Public License version 3.0 requirements will be
+** met: http://www.gnu.org/copyleft/gpl.html.
 **
-** Qt for Windows(R) Licensees
-** As a special exception, Nokia, as the sole copyright holder for Qt
-** Designer, grants users of the Qt/Eclipse Integration plug-in the
-** right for the Qt/Eclipse Integration to link to functionality
-** provided by Qt Designer and its related libraries.
-**
-** If you are unsure which license is appropriate for your use, please
-** contact the sales department at qt-sales@nokia.com.
+** $QT_END_LICENSE$
 **
 ****************************************************************************/
 
@@ -39,14 +43,16 @@
 #define QGL_H
 
 #include <QtGui/qwidget.h>
+#include <QtGui/qpaintengine.h>
 #include <QtOpenGL/qglcolormap.h>
 #include <QtCore/qmap.h>
+#include <QtCore/qscopedpointer.h>
+
+#ifdef Q_WS_QPA
+#include <QtGui/QPlatformWindowFormat>
+#endif
 
 QT_BEGIN_HEADER
-
-#if defined(Q_WS_QWS) || defined(Q_OS_WINCE)
-#define QT_OPENGL_ES 1
-#endif
 
 #if defined(Q_WS_WIN)
 # include <QtCore/qt_windows.h>
@@ -54,27 +60,39 @@ QT_BEGIN_HEADER
 
 #if defined(Q_WS_MAC)
 # include <OpenGL/gl.h>
-# include <OpenGL/glu.h>
-#elif defined(QT_OPENGL_ES)
-# include <GLES/gl.h>
-#ifndef GL_DOUBLE
-# define GL_DOUBLE GL_FLOAT
-#endif
-#ifndef GLdouble
+#elif defined(QT_OPENGL_ES_1)
+# if defined(Q_OS_MAC)
+#  include <OpenGLES/ES1/gl.h>
+# else
+#  include <GLES/gl.h>
+# endif
+# ifndef GL_DOUBLE
+#  define GL_DOUBLE GL_FLOAT
+# endif
+# ifndef GLdouble
 typedef GLfloat GLdouble;
-#endif
+# endif
+#elif defined(QT_OPENGL_ES_2)
+# if defined(Q_OS_MAC)
+#  include <OpenGLES/ES2/gl.h>
+# else
+#  include <GLES2/gl2.h>
+# endif
+# ifndef GL_DOUBLE
+#  define GL_DOUBLE GL_FLOAT
+# endif
+# ifndef GLdouble
+typedef GLfloat GLdouble;
+# endif
 #else
 # include <GL/gl.h>
-# ifndef QT_LSB
-#   include <GL/glu.h>
-# endif
 #endif
 
 QT_BEGIN_NAMESPACE
 
 QT_MODULE(OpenGL)
 
-#if defined(Q_WS_MAC) && defined (QT_BUILD_OPENGL_LIB) && !defined(Q_WS_MAC64) && !defined(QDOC)
+#if defined(Q_WS_MAC) && defined (QT_BUILD_OPENGL_LIB) && !defined(QT_MAC_USE_COCOA) && !defined(QDOC)
 #define Q_MAC_COMPAT_GL_FUNCTIONS
 
 template <typename T>
@@ -102,7 +120,7 @@ typedef QMacGLCompatTypes<GLint>::CompatGLenum QMacCompatGLenum;
 #ifdef QT3_SUPPORT
 #define QGL_VERSION        460
 #define QGL_VERSION_STR        "4.6"
-Q_OPENGL_EXPORT inline QT3_SUPPORT const char *qGLVersion() {
+inline QT3_SUPPORT const char *qGLVersion() {
     return QGL_VERSION_STR;
 }
 #endif
@@ -112,7 +130,7 @@ class QGLCmap;
 #endif
 
 class QPixmap;
-#if defined(Q_WS_X11)
+#if defined(Q_WS_X11) && !defined(QT_OPENGL_ES)
 class QGLOverlayWidget;
 #endif
 class QGLWidgetPrivate;
@@ -121,6 +139,8 @@ class QGLContextPrivate;
 // Namespace class:
 namespace QGL
 {
+    Q_OPENGL_EXPORT void setPreferredPaintEngine(QPaintEngine::Type engineType);
+
     enum FormatOption {
         DoubleBuffer            = 0x0001,
         DepthBuffer             = 0x0002,
@@ -132,6 +152,7 @@ namespace QGL
         DirectRendering         = 0x0080,
         HasOverlay              = 0x0100,
         SampleBuffers           = 0x0200,
+        DeprecatedFunctions     = 0x0400,
         SingleBuffer            = DoubleBuffer    << 16,
         NoDepthBuffer           = DepthBuffer     << 16,
         ColorIndex              = Rgba            << 16,
@@ -141,13 +162,13 @@ namespace QGL
         NoStereoBuffers         = StereoBuffers   << 16,
         IndirectRendering       = DirectRendering << 16,
         NoOverlay               = HasOverlay      << 16,
-        NoSampleBuffers         = SampleBuffers   << 16
+        NoSampleBuffers         = SampleBuffers   << 16,
+        NoDeprecatedFunctions   = DeprecatedFunctions << 16
     };
     Q_DECLARE_FLAGS(FormatOptions, FormatOption)
 }
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QGL::FormatOptions)
-
 
 class QGLFormatPrivate;
 
@@ -224,7 +245,20 @@ public:
     static bool hasOpenGL();
     static bool hasOpenGLOverlays();
 
-    enum  OpenGLVersionFlag {
+    void setVersion(int major, int minor);
+    int majorVersion() const;
+    int minorVersion() const;
+
+    enum OpenGLContextProfile {
+        NoProfile,
+        CoreProfile,
+        CompatibilityProfile
+    };
+
+    void setProfile(OpenGLContextProfile profile);
+    OpenGLContextProfile profile() const;
+
+    enum OpenGLVersionFlag {
         OpenGL_Version_None               = 0x00000000,
         OpenGL_Version_1_1                = 0x00000001,
         OpenGL_Version_1_2                = 0x00000002,
@@ -237,23 +271,41 @@ public:
         OpenGL_ES_CommonLite_Version_1_0  = 0x00000100,
         OpenGL_ES_Common_Version_1_1      = 0x00000200,
         OpenGL_ES_CommonLite_Version_1_1  = 0x00000400,
-        OpenGL_ES_Version_2_0             = 0x00000800
+        OpenGL_ES_Version_2_0             = 0x00000800,
+        OpenGL_Version_3_0                = 0x00001000,
+        OpenGL_Version_3_1                = 0x00002000,
+        OpenGL_Version_3_2                = 0x00004000,
+        OpenGL_Version_3_3                = 0x00008000,
+        OpenGL_Version_4_0                = 0x00010000
     };
     Q_DECLARE_FLAGS(OpenGLVersionFlags, OpenGLVersionFlag)
 
     static OpenGLVersionFlags openGLVersionFlags();
 
+#if defined(Q_WS_QPA)
+    static QGLFormat fromPlatformWindowFormat(const QPlatformWindowFormat &format);
+    static QPlatformWindowFormat toPlatformWindowFormat(const QGLFormat &format);
+#endif
 private:
     QGLFormatPrivate *d;
 
+    void detach();
+
     friend Q_OPENGL_EXPORT bool operator==(const QGLFormat&, const QGLFormat&);
     friend Q_OPENGL_EXPORT bool operator!=(const QGLFormat&, const QGLFormat&);
+#ifndef QT_NO_DEBUG_STREAM
+    friend Q_OPENGL_EXPORT QDebug operator<<(QDebug, const QGLFormat &);
+#endif
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QGLFormat::OpenGLVersionFlags)
 
 Q_OPENGL_EXPORT bool operator==(const QGLFormat&, const QGLFormat&);
 Q_OPENGL_EXPORT bool operator!=(const QGLFormat&, const QGLFormat&);
+
+#ifndef QT_NO_DEBUG_STREAM
+Q_OPENGL_EXPORT QDebug operator<<(QDebug, const QGLFormat &);
+#endif
 
 class Q_OPENGL_EXPORT QGLContext
 {
@@ -268,7 +320,8 @@ public:
     bool isSharing() const;
     void reset();
 
-    // ### Qt 5: make format() return a const ref instead
+    static bool areSharing(const QGLContext *context1, const QGLContext *context2);
+
     QGLFormat format() const;
     QGLFormat requestedFormat() const;
     void setFormat(const QGLFormat& format);
@@ -278,6 +331,29 @@ public:
     virtual void doneCurrent();
 
     virtual void swapBuffers() const;
+
+    enum BindOption {
+        NoBindOption                            = 0x0000,
+        InvertedYBindOption                     = 0x0001,
+        MipmapBindOption                        = 0x0002,
+        PremultipliedAlphaBindOption            = 0x0004,
+        LinearFilteringBindOption               = 0x0008,
+
+        MemoryManagedBindOption                 = 0x0010, // internal flag
+        CanFlipNativePixmapBindOption           = 0x0020, // internal flag
+
+        DefaultBindOption                       = LinearFilteringBindOption
+                                                  | InvertedYBindOption
+                                                  | MipmapBindOption,
+        InternalBindOption                      = MemoryManagedBindOption
+                                                  | PremultipliedAlphaBindOption
+    };
+    Q_DECLARE_FLAGS(BindOptions, BindOption)
+
+    GLuint bindTexture(const QImage &image, GLenum target, GLint format,
+                       BindOptions options);
+    GLuint bindTexture(const QPixmap &pixmap, GLenum target, GLint format,
+                       BindOptions options);
 
     GLuint bindTexture(const QImage &image, GLenum target = GL_TEXTURE_2D,
                        GLint format = GL_RGBA);
@@ -295,9 +371,13 @@ public:
                        QMacCompatGLint format = GL_RGBA);
     GLuint bindTexture(const QPixmap &pixmap, QMacCompatGLenum = GL_TEXTURE_2D,
                        QMacCompatGLint format = GL_RGBA);
+    GLuint bindTexture(const QImage &image, QMacCompatGLenum, QMacCompatGLint format,
+                       BindOptions);
+    GLuint bindTexture(const QPixmap &pixmap, QMacCompatGLenum, QMacCompatGLint format,
+                       BindOptions);
 
     void deleteTexture(QMacCompatGLuint tx_id);
-    
+
     void drawTexture(const QRectF &target, QMacCompatGLuint textureId, QMacCompatGLenum textureTarget = GL_TEXTURE_2D);
     void drawTexture(const QPointF &point, QMacCompatGLuint textureId, QMacCompatGLenum textureTarget = GL_TEXTURE_2D);
 #endif
@@ -311,6 +391,9 @@ public:
 
     static const QGLContext* currentContext();
 
+#ifdef Q_WS_QPA
+    static QGLContext *fromPlatformGLContext(QPlatformGLContext *platformContext);
+#endif
 protected:
     virtual bool chooseContext(const QGLContext* shareContext = 0);
 
@@ -340,31 +423,53 @@ protected:
     static QGLContext* currentCtx;
 
 private:
-    QGLContextPrivate* d_ptr;
+#ifdef Q_WS_QPA
+    QGLContext(QPlatformGLContext *platformContext);
+#endif
+
+    QScopedPointer<QGLContextPrivate> d_ptr;
 
     friend class QGLPixelBuffer;
     friend class QGLPixelBufferPrivate;
     friend class QGLWidget;
-    friend class QGLDrawable;
     friend class QGLWidgetPrivate;
     friend class QGLGlyphCache;
     friend class QOpenGLPaintEngine;
     friend class QOpenGLPaintEnginePrivate;
+    friend class QGL2PaintEngineEx;
+    friend class QGL2PaintEngineExPrivate;
+    friend class QGLEngineShaderManager;
+    friend class QGLWindowSurface;
+    friend class QGLPixmapData;
+    friend class QGLPixmapFilterBase;
+    friend class QGLTextureGlyphCache;
+    friend struct QGLGlyphTexture;
+    friend class QGLContextGroup;
+    friend class QGLSharedResourceGuard;
+    friend class QGLPixmapBlurFilter;
+    friend class QGLExtensions;
+    friend class QGLTexture;
+    friend QGLFormat::OpenGLVersionFlags QGLFormat::openGLVersionFlags();
 #ifdef Q_WS_MAC
-    friend class QMacGLWindowChangeEvent;
+public:
     void updatePaintDevice();
+private:
+    friend class QMacGLWindowChangeEvent;
     friend QGLContextPrivate *qt_phonon_get_dptr(const QGLContext *);
 #endif
-#ifdef Q_WS_WIN
     friend class QGLFramebufferObject;
     friend class QGLFramebufferObjectPrivate;
-    friend bool qt_resolve_GLSL_functions(QGLContext *ctx);
-    friend bool qt_createGLSLProgram(QGLContext *ctx, GLuint &program, const char *shader_src, GLuint &shader);
-#endif
+    friend class QGLFBOGLPaintDevice;
+    friend class QGLPaintDevice;
+    friend class QGLWidgetGLPaintDevice;
+    friend class QX11GLPixmapData;
+    friend class QX11GLSharedContexts;
+    friend class QGLContextResourceBase;
 private:
     Q_DISABLE_COPY(QGLContext)
 };
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(QGLContext::BindOptions)
 
 class Q_OPENGL_EXPORT QGLWidget : public QWidget
 {
@@ -400,7 +505,6 @@ public:
     bool doubleBuffer() const;
     void swapBuffers();
 
-    // ### Qt 5: make format() return a const ref instead
     QGLFormat format() const;
     void setFormat(const QGLFormat& format);
 
@@ -427,10 +531,16 @@ public:
                      const QFont & fnt = QFont(), int listBase = 2000);
     QPaintEngine *paintEngine() const;
 
+    GLuint bindTexture(const QImage &image, GLenum target, GLint format,
+                       QGLContext::BindOptions options);
+    GLuint bindTexture(const QPixmap &pixmap, GLenum target, GLint format,
+                       QGLContext::BindOptions options);
+
     GLuint bindTexture(const QImage &image, GLenum target = GL_TEXTURE_2D,
                        GLint format = GL_RGBA);
     GLuint bindTexture(const QPixmap &pixmap, GLenum target = GL_TEXTURE_2D,
                        GLint format = GL_RGBA);
+
     GLuint bindTexture(const QString &fileName);
 
     void deleteTexture(GLuint tx_id);
@@ -443,6 +553,10 @@ public:
                        QMacCompatGLint format = GL_RGBA);
     GLuint bindTexture(const QPixmap &pixmap, QMacCompatGLenum = GL_TEXTURE_2D,
                        QMacCompatGLint format = GL_RGBA);
+    GLuint bindTexture(const QImage &image, QMacCompatGLenum, QMacCompatGLint format,
+                       QGLContext::BindOptions);
+    GLuint bindTexture(const QPixmap &pixmap, QMacCompatGLenum, QMacCompatGLint format,
+                       QGLContext::BindOptions);
 
     void deleteTexture(QMacCompatGLuint tx_id);
 
@@ -484,8 +598,11 @@ private:
     friend class QGLPixelBuffer;
     friend class QGLPixelBufferPrivate;
     friend class QGLContext;
+    friend class QGLContextPrivate;
     friend class QGLOverlayWidget;
     friend class QOpenGLPaintEngine;
+    friend class QGLPaintDevice;
+    friend class QGLWidgetGLPaintDevice;
 };
 
 
