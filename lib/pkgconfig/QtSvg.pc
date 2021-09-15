@@ -1,4 +1,4 @@
-prefix=/opt/legacy_qt/desktop/
+prefix=/opt/legacy_qt/qt487_desktop
 exec_prefix=${prefix}
 libdir=${prefix}/lib
 includedir=${prefix}/include/QtSvg
@@ -13,7 +13,7 @@ Name: Qtsvg
 Description: Qtsvg Library
 Version: 4.8.7
 Libs: -L${libdir} -lQtSvg 
-Libs.private: -L/opt/legacy_qt/desktop//lib  -lQtGui -L/opt/legacy_qt/desktop//lib -L/usr/X11R6/lib -lQtCore -lpthread   
-Cflags: -DQT_SHARED -I/opt/legacy_qt/desktop//include -I${includedir}
+Libs.private: -L/opt/legacy_qt/qt487_desktop/lib  -lQtGui -L/opt/legacy_qt/qt487_desktop/lib -L/usr/X11R6/lib -lQtCore -lpthread   
+Cflags: -DQT_SHARED -I/opt/legacy_qt/qt487_desktop/include -I${includedir}
 Requires: QtCore QtGui
 

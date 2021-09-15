@@ -1,4 +1,4 @@
-prefix=/opt/legacy_qt/desktop/
+prefix=/opt/legacy_qt/qt487_desktop
 exec_prefix=${prefix}
 libdir=${prefix}/lib
 includedir=${prefix}/include/QtGui
@@ -13,7 +13,7 @@ Name: Qtgui
 Description: Qtgui Library
 Version: 4.8.7
 Libs: -L${libdir} -lQtGui 
-Libs.private: -L/opt/legacy_qt/desktop//lib -L/usr/X11R6/lib  -lQtCore -L/opt/legacy_qt/desktop//lib -lpthread -lgthread-2.0 -pthread -lglib-2.0 -lfreetype -lgobject-2.0 -lglib-2.0 -lSM -lICE -lXrender -lfontconfig -lfreetype -lXext -lX11 -lm  
-Cflags: -DQT_SHARED -I/opt/legacy_qt/desktop//include -I${includedir}
+Libs.private: -L/opt/legacy_qt/qt487_desktop/lib -L/usr/X11R6/lib  -lQtCore -L/opt/legacy_qt/qt487_desktop/lib -lpthread -lgthread-2.0 -pthread -lglib-2.0 -lfreetype -lgobject-2.0 -lglib-2.0 -lSM -lICE -lXrender -lfontconfig -lfreetype -lXext -lX11 -lm  
+Cflags: -DQT_SHARED -I/opt/legacy_qt/qt487_desktop/include -I${includedir}
 Requires: QtCore
 

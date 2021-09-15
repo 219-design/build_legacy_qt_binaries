@@ -15,7 +15,7 @@ QT_LIBINFIX =
 QT_NAMESPACE = 
 QT_NAMESPACE_MAC_CRC = 
 
-QMAKE_RPATHDIR += "/opt/legacy_qt/desktop//lib"
+QMAKE_RPATHDIR += "/opt/legacy_qt/qt487_desktop/lib"
 QT_GCC_MAJOR_VERSION = 7
 QT_GCC_MINOR_VERSION = 0
 QT_GCC_PATCH_VERSION = 0
